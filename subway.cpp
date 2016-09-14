@@ -72,12 +72,16 @@ int main(int argc, char* argv[])
 					headmark = 0;
 				}
 				if (i == id) {
-					station[id] = Station(s, line-1, id);
+					station[id] = Station(s, line - 1, id);
 					id++;
 					if (id > 1) {
 						int sum = station[per_id].getLineSum();
 						for (int j = 0; j < sum; j++) {
-							if (station[per_id].getLine(j)+1 == line) {
+							if (line == 18 && i_line >= 4) {
+								station[per_id].appendNeight(id-1);
+								break;
+							}
+							else if (station[per_id].getLine(j) + 1 == line) {
 								station[id - 1].appendNeight(per_id);
 								station[per_id].appendNeight(id - 1);
 								break;
@@ -85,11 +89,14 @@ int main(int argc, char* argv[])
 						}
 					}
 				}
-				//连续多个换乘会出错，不是上一个
 				else {
 					int sum = station[per_id].getLineSum();
 					for (int j = 0; j < sum; j++) {
-						if (station[per_id].getLine(j)+1 == line) {
+						if (line == 18 && i_line >= 4) {
+							station[per_id].appendNeight(i);
+							break;
+						}
+						else if (station[per_id].getLine(j)+1 == line) {
 							station[i].appendNeight(per_id);
 							station[per_id].appendNeight(i);
 							break;
@@ -112,9 +119,9 @@ int main(int argc, char* argv[])
 		cout << "\n";
 	}
 	*/
-	/*
-	for (int j = 0; j < line; j++) {
-		cout << station[head[j]].getName() << endl;
+	
+	/*for (int j = 0; j < line; j++) {
+		cout <<j << lineName[j] << endl;
 	}*/
 	if (argc > 0) {
 		if (argv[1][0] == '-') {
@@ -239,7 +246,9 @@ int main(int argc, char* argv[])
 				//int mark[300] = { 0 };
 				int per[300][3];
 				int now_line;
-				int mark_line[20] = { 0 };
+				int mark_line[20] = { 999 };
+				for (int i = 0; i < 20; i++)
+					mark_line[i] = 999;
 				for (int i = 0; i < id; i++) {
 					if (station[i].getLineSum() > 1)
 						exchange_sum++;
@@ -288,50 +297,62 @@ int main(int argc, char* argv[])
 						
 						for (int i = 0; i < station[head_id].getLineSum(); i++) {
 							now_line = station[head_id].getLine(i);
-							if (mark_line[now_line] == 0) {
+							if (mark_line[now_line] >= per[head_id][2]) {
 								//cout << now_line << " " << lineName[now_line] << endl;
 								int j;
 								for (j = 0; j <= head[now_line][0]; j++) {
 									if (head[now_line][j] == head_id)
 										break;
 								}
-								int distance = 0;
-								for (int k = j - 1; k >= 1; k--, distance++) {
-									//if (now_line == 4) {
-										//cout << per[head[now_line][j]][2] << "and"<< per[head[now_line][k]][2] << endl;
-									//}
-									if (per[head[now_line][j]][1] + distance < per[head[now_line][k]][1] && per[head[now_line][j]][2] <= per[head[now_line][k]][2]) {
-										if (station[head[now_line][k]].getLineSum() > 1 && per[head[now_line][k]][0] == -1) {
-											queue_exchange[++last_exchange] = head[now_line][k];
-											per[head[now_line][k]][2] = per[head[now_line][j]][2]+1;
-											if (top_exchange == -1)
-												top_exchange++;
+								int distance = 1;
+								int k;
+								for (; j-distance >= 1 || j+distance<=head[now_line][0]; distance++) {
+									if (j - distance >= 1 || now_line == 1 || now_line == 8) {
+										k = j - distance;
+										if (k <= 0)
+											k += head[now_line][0];
+										//if (now_line == 1) {
+											//cout << station[head[now_line][k]].getName() << distance << endl;
+										//}
+										if (per[head[now_line][j]][1] + distance < per[head[now_line][k]][1] && per[head[now_line][j]][2] <= per[head[now_line][k]][2]) {
+											if (station[head[now_line][k]].getLineSum() > 1 && per[head[now_line][k]][0] == -1) {
+												queue_exchange[++last_exchange] = head[now_line][k];
+												per[head[now_line][k]][2] = per[head[now_line][j]][2] + 1;
+												if (top_exchange == -1)
+													top_exchange++;
+											}
+											per[head[now_line][k]][0] = head[now_line][k + 1];
+											per[head[now_line][k]][1] = per[head[now_line][j]][1] + distance;
+											if (per[head[now_line][k]][2] == 999)
+												per[head[now_line][k]][2] = per[head[now_line][j]][2];
 										}
-										per[head[now_line][k]][0] = head[now_line][k + 1];
-										per[head[now_line][k]][1] = per[head[now_line][j]][1] + distance;
-										if(per[head[now_line][k]][2] == 999)
-											per[head[now_line][k]][2] = per[head[now_line][j]][2];
+									}
+									if (j + distance <= head[now_line][0] || now_line == 1 || now_line == 8) {
+										k = j + distance;
+										if (k > head[now_line][0]) {
+											k -= head[now_line][0];
+										}
+										//if (now_line == 1 ) {
+											//cout << station[head[now_line][k]].getName() << distance << endl;
+										//}
+										if (per[head[now_line][j]][1] + distance < per[head[now_line][k]][1] && per[head[now_line][j]][2] <= per[head[now_line][k]][2]) {
+											if (station[head[now_line][k]].getLineSum() > 1 && per[head[now_line][k]][0] == -1) {
+												queue_exchange[++last_exchange] = head[now_line][k];
+												per[head[now_line][k]][2] = per[head[now_line][j]][2] + 1;
+												if (top_exchange == -1)
+													top_exchange++;
+											}
+											per[head[now_line][k]][0] = head[now_line][k - 1];
+											per[head[now_line][k]][1] = per[head[now_line][j]][1] + distance;
+											if (per[head[now_line][k]][2] == 999)
+												per[head[now_line][k]][2] = per[head[now_line][j]][2];
+										}
 									}
 								}
-								distance = 0;
-								for (int k = j + 1; k <= head[now_line][0]; k++, distance++) {
-									//if (now_line == 4) {
-										//cout << "" << endl;
-									//}
-									if (per[head[now_line][j]][1] + distance < per[head[now_line][k]][1] && per[head[now_line][j]][2] <= per[head[now_line][k]][2]) {
-										if (station[head[now_line][k]].getLineSum() > 1 && per[head[now_line][k]][0] == -1) {
-											queue_exchange[++last_exchange] = head[now_line][k];
-											per[head[now_line][k]][2] = per[head[now_line][j]][2] + 1;
-											if (top_exchange == -1)
-												top_exchange++;
-										}
-										per[head[now_line][k]][0] = head[now_line][k - 1];
-										per[head[now_line][k]][1] = per[head[now_line][j]][1] + distance;
-										if (per[head[now_line][k]][2] == 999)
-											per[head[now_line][k]][2] = per[head[now_line][j]][2];
-									}
-								}
+								if(mark_line[now_line] > per[head[now_line][j]][2])
+									mark_line[now_line] = per[head[now_line][j]][2];
 							}
+
 								
 							/*	while (top <= last) {
 									top++;
@@ -357,8 +378,6 @@ int main(int argc, char* argv[])
 										}
 									}
 								}*/
-							
-							mark_line[now_line] = 1;
 						}
 					}
 
