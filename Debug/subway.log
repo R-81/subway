@@ -1,2 +1,6 @@
-﻿  subway.cpp
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppClean.targets(76,5): warning : 文件“g:\大三上\软件工程\subway\subway\debug\subway.pch.codeanalysisast”正由另一进程使用，因此该进程无法访问此文件。
+  stdafx.cpp
+  subway.cpp
+LINK : warning LNK4075: 忽略“/INCREMENTAL”(由于“/PROFILE”规范)
+stdafx.obj : warning LNK4075: 忽略“/EDITANDCONTINUE”(由于“/OPT:LBR”规范)
   subway.vcxproj -> G:\大三上\软件工程\subway\Debug\subway.exe
